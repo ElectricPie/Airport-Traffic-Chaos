@@ -1,8 +1,7 @@
-using System;
 using UnityEngine;
-using UnityEngine.Serialization;
+using UnityEngine.Events;
 
-public class RadarEmitter : MonoBehaviour
+public abstract class RadarBase : MonoBehaviour
 {
     [Tooltip("The max angle in degrees that a pulse will be emitted")] [Min(0f)]
     [SerializeField] private float m_verticalAngle = 30f;
@@ -13,6 +12,8 @@ public class RadarEmitter : MonoBehaviour
     private float m_nauticalMiles = 2000f;
 
     private readonly Collider[] m_detectedObjects = new Collider[20];
+    
+    public float Range => m_range;
 
     private void Awake()
     {
@@ -37,9 +38,7 @@ public class RadarEmitter : MonoBehaviour
                 continue;
             }
 
-            Debug.DrawLine(Vector3.zero, transform.forward, Color.red);
             Vector3 directionToTarget = (m_detectedObjects[i].transform.position - transform.position).normalized;
-            Debug.DrawLine(Vector3.zero, directionToTarget, Color.blue);
 
             // Get the pitch from radar forward to object
             Vector2 pitchFlatForward = new Vector2(transform.forward.y, transform.forward.z).normalized;
@@ -53,12 +52,16 @@ public class RadarEmitter : MonoBehaviour
             float yawDot = Vector3.Dot(yawFlatForward, yawFlatDirectionToTarget);
             float yawToTarget = Mathf.Acos(yawDot) * Mathf.Rad2Deg;
 
+            // Check if object is within scan area
             if (yawToTarget < m_horizontalAngle && pitchToTarget < m_verticalAngle)
             {
                 Debug.Log("Target in sight");
+                OnTargetDetected(m_detectedObjects[i].gameObject);
             }
         }
     }
+
+    protected abstract void OnTargetDetected(GameObject target);
 
     private Vector3 GetRelativeDirectionOfAngle(float pitch, float yaw)
     {

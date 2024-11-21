@@ -221,7 +221,7 @@ Transform:
   m_GameObject: {fileID: 55010570}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.19, y: 0, z: -1.38}
+  m_LocalPosition: {x: 2.19, y: 2.807, z: -3.189}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -583,7 +583,7 @@ GameObject:
   - component: {fileID: 499024097}
   - component: {fileID: 499024098}
   m_Layer: 0
-  m_Name: RadarTransmitter
+  m_Name: Radar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -627,14 +627,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 499024095}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fd57a2a262aebb441a4b423f027f63b6, type: 3}
+  m_Script: {fileID: 11500000, guid: 3bffb23bf1cf00044be433e6402c3965, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_verticalAngle: 30
   m_horizontalAngle: 2
   m_range: 20
-  yawTotarget: 0
-  pitchTotarget: 0
+  OnTargetDetectedEvent:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &564916305
 GameObject:
   m_ObjectHideFlags: 0
@@ -1041,7 +1042,8 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 53817150}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
