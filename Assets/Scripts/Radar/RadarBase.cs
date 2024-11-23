@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 public abstract class RadarBase : MonoBehaviour
 {
@@ -7,17 +7,19 @@ public abstract class RadarBase : MonoBehaviour
     [SerializeField] private float m_verticalAngle = 30f;
     [Tooltip("The max angle in degrees that a pulse will be emitted")] [Min(0f)]
     [SerializeField] private float m_horizontalAngle = 2f;
+    [FormerlySerializedAs("m_rangeInNauticalMiles")]
     [Tooltip("The range of the radar in nautical miles")]
-    [SerializeField] private float m_range = 20f;
-    private float m_nauticalMiles = 2000f;
+    [SerializeField] private float m_nauticalRangeInNauticalMiles = 20f;
+    private float m_unityRange = 2000f;
 
     private readonly Collider[] m_detectedObjects = new Collider[20];
     
-    public float Range => m_range;
+    public float NauticalRange => m_nauticalRangeInNauticalMiles;
+    public float Range => m_unityRange;
 
     private void Awake()
     {
-        m_nauticalMiles = m_range * 100f;
+        m_unityRange = DistanceUtilities.NauticalMilesToUnityUnit(m_nauticalRangeInNauticalMiles);
     }
 
     private void Update()
@@ -27,7 +29,7 @@ public abstract class RadarBase : MonoBehaviour
 
     private void CheckObjectsInRange()
     {
-        int size = Physics.OverlapSphereNonAlloc(transform.position, m_nauticalMiles, m_detectedObjects);
+        int size = Physics.OverlapSphereNonAlloc(transform.position, m_unityRange, m_detectedObjects);
         if (size == 0)
             return;
 
@@ -75,9 +77,9 @@ public abstract class RadarBase : MonoBehaviour
         return direction.normalized;
     }
     
-    private void OnDrawGizmos()
+    protected virtual void OnDrawGizmos()
     {
-        float nauticalRange = m_range * 100f;
+        float nauticalRange = DistanceUtilities.NauticalMilesToUnityUnit(m_nauticalRangeInNauticalMiles);
 
         // Draw Range Sphere
         Gizmos.color = Color.green;
