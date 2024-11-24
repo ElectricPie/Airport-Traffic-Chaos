@@ -1,5 +1,7 @@
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
-using UnityEngine.Serialization;
+using UnityEngine.Events;
 
 public abstract class RadarBase : MonoBehaviour
 {
@@ -7,15 +9,18 @@ public abstract class RadarBase : MonoBehaviour
     [SerializeField] private float m_verticalAngle = 30f;
     [Tooltip("The max angle in degrees that a pulse will be emitted")] [Min(0f)]
     [SerializeField] private float m_horizontalAngle = 2f;
-    [FormerlySerializedAs("m_rangeInNauticalMiles")]
     [Tooltip("The range of the radar in nautical miles")]
     [SerializeField] private float m_nauticalRangeInNauticalMiles = 20f;
     private float m_unityRange = 2000f;
 
-    private readonly Collider[] m_detectedObjects = new Collider[20];
+    private const int DETECTED_OBJECT_MAX = 20;
+    private readonly Collider[] m_detectedObjects = new Collider[DETECTED_OBJECT_MAX];
+    private HashSet<Collider> m_collidersInRange = new HashSet<Collider>();
     
     public float NauticalRange => m_nauticalRangeInNauticalMiles;
     public float Range => m_unityRange;
+
+    public UnityEvent<GameObject> OnObjectLeftRange = new UnityEvent<GameObject>();
 
     private void Awake()
     {
@@ -33,6 +38,7 @@ public abstract class RadarBase : MonoBehaviour
         if (size == 0)
             return;
 
+        HashSet<Collider> currentCollidersInRange = new HashSet<Collider>();
         for (int i = 0; i < size; i++)
         {
             if (m_detectedObjects[i] is null)
@@ -59,7 +65,16 @@ public abstract class RadarBase : MonoBehaviour
             {
                 OnTargetDetected(m_detectedObjects[i].gameObject);
             }
+
+            currentCollidersInRange.Add(m_detectedObjects[i]);
         }
+
+        // Check for any objects that have gone out of range
+        foreach (Collider contact in m_collidersInRange.Where(contact => !currentCollidersInRange.Contains(contact)))
+        {
+            OnObjectLeftRange.Invoke(contact.gameObject);
+        }
+        m_collidersInRange = currentCollidersInRange;
     }
 
     protected abstract void OnTargetDetected(GameObject target);

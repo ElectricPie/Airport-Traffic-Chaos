@@ -4,7 +4,7 @@ using UnityEngine.Events;
 public class PrimaryRadar : RadarBase
 {
     // DetectedObject, DirectionToTarget, DistanceToTarget
-    public UnityEvent<GameObject, Vector2, float> OnTargetDetectedEvent = new UnityEvent<GameObject, Vector2, float>();
+    public UnityEvent<GameObject, Vector2, float> OnObjectDetectedEvent = new UnityEvent<GameObject, Vector2, float>();
     
     protected override void OnTargetDetected(GameObject target)
     {
@@ -15,6 +15,6 @@ public class PrimaryRadar : RadarBase
         
         float distance = (radarPositionOnPlane - targetPositionOnPlane).magnitude;
         
-        OnTargetDetectedEvent.Invoke(target, directionToTarget, distance);
+        OnObjectDetectedEvent.Invoke(target, directionToTarget, distance);
     }
 }

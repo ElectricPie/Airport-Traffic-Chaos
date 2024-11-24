@@ -30,11 +30,12 @@ public class PrimaryRadarDisplay : MonoBehaviour
     {
         if (m_radar is not null)
         {
-            m_radar.OnTargetDetectedEvent.AddListener(OnTargetDetected);
+            m_radar.OnObjectDetectedEvent.AddListener(OnObjectDetected);
+            m_radar.OnObjectLeftRange.AddListener(OnObjectLeftRange);
         }
     }
 
-    private void OnTargetDetected(GameObject target, Vector2 directionToTarget, float distanceToTarget)
+    private void OnObjectDetected(GameObject detectedObject, Vector2 directionToTarget, float distanceToTarget)
     {
         if (m_radarWidgetTransform is null || m_radar is null)
             return;
@@ -55,7 +56,7 @@ public class PrimaryRadarDisplay : MonoBehaviour
             directionToTarget.y * widgetHeightDistance * distanceToTarget);
 
         // Update/Create contacts
-        if (m_radarContacts.TryGetValue(target, out PrimaryRadarContact contact))
+        if (m_radarContacts.TryGetValue(detectedObject, out PrimaryRadarContact contact))
         {
             // Prevent the same contact being updated too much
             if (contact.LastUpdateTime + m_minimumUpdateTime < Time.time)
@@ -73,7 +74,7 @@ public class PrimaryRadarDisplay : MonoBehaviour
             {
                 PrimaryRadarContact newContact = new PrimaryRadarContact(newContactTransform);
                 newContactTransform.anchoredPosition = widgetPosition;
-                m_radarContacts.Add(target, newContact);
+                m_radarContacts.Add(detectedObject, newContact);
             }
             else
             {
@@ -83,5 +84,12 @@ public class PrimaryRadarDisplay : MonoBehaviour
         }
     }
     
-    // TODO: Handle contact leaving radar range
+    private void OnObjectLeftRange(GameObject objectOutOfRange)
+    {
+        if (m_radarContacts.TryGetValue(objectOutOfRange, out PrimaryRadarContact contact))
+        {
+            Destroy(contact.WidgetRectTransform.gameObject);
+            m_radarContacts.Remove(objectOutOfRange);
+        }
+    }
 }
