@@ -227,9 +227,6 @@ MonoBehaviour:
   m_radar: {fileID: 499024098}
   m_radarWidgetTransform: {fileID: 25149809}
   m_radarContactPrefab: {fileID: 4522469115158686856, guid: 14e30a4be13c772439d19af61461a298, type: 3}
-  widgetWidth: 0
-  widgetHeight: 0
-  widgetDimensions: {x: 0, y: 0}
 --- !u!1 &53817149
 GameObject:
   m_ObjectHideFlags: 0
@@ -408,7 +405,7 @@ Transform:
   m_GameObject: {fileID: 55010570}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 957.6, y: 311, z: -101.3}
+  m_LocalPosition: {x: 1743, y: 536, z: -101.3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -819,7 +816,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_verticalAngle: 30
   m_horizontalAngle: 2
-  m_range: 20
+  m_nauticalRangeInNauticalMiles: 20
   OnTargetDetectedEvent:
     m_PersistentCalls:
       m_Calls: []
