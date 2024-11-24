@@ -57,7 +57,6 @@ public abstract class RadarBase : MonoBehaviour
             // Check if object is within scan area
             if (yawToTarget < m_horizontalAngle && pitchToTarget < m_verticalAngle)
             {
-                Debug.Log("Target in sight");
                 OnTargetDetected(m_detectedObjects[i].gameObject);
             }
         }

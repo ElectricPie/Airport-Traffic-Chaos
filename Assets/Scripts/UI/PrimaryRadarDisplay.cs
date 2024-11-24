@@ -5,11 +5,12 @@ using UnityEngine;
 public class PrimaryRadarContact
 {
     public RectTransform WidgetRectTransform { get; }
+    public float LastUpdateTime;
 
     public PrimaryRadarContact(RectTransform widgetRectTransform)
-
     {
         WidgetRectTransform = widgetRectTransform;
+        LastUpdateTime = Time.time;
     }
 }
 
@@ -19,8 +20,11 @@ public class PrimaryRadarDisplay : MonoBehaviour
     [SerializeField] private RectTransform m_radarWidgetTransform = null;
 
     [SerializeField] private GameObject m_radarContactPrefab;
+    
+    [Tooltip("The minimum amount of time between a contact updating its position")]
+    [SerializeField] private float m_minimumUpdateTime = 0.5f;
 
-    private Dictionary<GameObject, PrimaryRadarContact> m_radarContacts = new Dictionary<GameObject, PrimaryRadarContact>();
+    private readonly Dictionary<GameObject, PrimaryRadarContact> m_radarContacts = new Dictionary<GameObject, PrimaryRadarContact>();
 
     private void Start()
     {
@@ -37,23 +41,28 @@ public class PrimaryRadarDisplay : MonoBehaviour
 
         if (m_radarContactPrefab is null)
         {
-            Debug.LogError($"{name} is missing radar contact prefab");
+            Debug.LogError($"{name} is missing radar contact prefab", this);
             return;
         }
 
+        // Calculate the distance of contacts on the widget vs radar range
         float halfWidth = m_radarWidgetTransform.rect.size.x / 2f;
         float widgetWidthDistance = halfWidth / m_radar.Range;
-
         float halfHeight = m_radarWidgetTransform.rect.size.y / 2f;
         float widgetHeightDistance = halfHeight / m_radar.Range;
-
+        
         Vector2 widgetPosition = new Vector2(directionToTarget.x * widgetWidthDistance * distanceToTarget,
             directionToTarget.y * widgetHeightDistance * distanceToTarget);
 
         // Update/Create contacts
         if (m_radarContacts.TryGetValue(target, out PrimaryRadarContact contact))
         {
-            contact.WidgetRectTransform.anchoredPosition = widgetPosition;
+            // Prevent the same contact being updated too much
+            if (contact.LastUpdateTime + m_minimumUpdateTime < Time.time)
+            {
+                contact.WidgetRectTransform.anchoredPosition = widgetPosition;
+                contact.LastUpdateTime = Time.time;
+            }
         }
         else
         {
