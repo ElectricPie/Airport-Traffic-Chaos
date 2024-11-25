@@ -1,16 +1,35 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 // Setup for later data
-public class PrimaryRadarContact
+public struct PrimaryRadarContact
 {
+    public GameObject WidgetGameObject { get; }
+    // The game object in world the contact represents
+    public GameObject ContactGameObject { get; }
     public RectTransform WidgetRectTransform { get; }
     public float LastUpdateTime;
 
-    public PrimaryRadarContact(RectTransform widgetRectTransform)
+    public PrimaryRadarContact(GameObject widgetGameObject, GameObject contactGameObject, RectTransform widgetRectTransform)
     {
+        WidgetGameObject = widgetGameObject;
+        ContactGameObject = contactGameObject;
         WidgetRectTransform = widgetRectTransform;
         LastUpdateTime = Time.time;
+    }
+}
+
+public struct ContactPendingDestruction
+{
+    public PrimaryRadarContact PrimaryRadarContact { get; }
+    // The Time.time the contact will be destroyed
+    public float DestroyAtTime { get; }
+
+    public ContactPendingDestruction(PrimaryRadarContact primaryRadarContact, float destroyAtTime)
+    {
+        PrimaryRadarContact = primaryRadarContact;
+        DestroyAtTime = destroyAtTime;
     }
 }
 
@@ -23,8 +42,11 @@ public class PrimaryRadarDisplay : MonoBehaviour
     
     [Tooltip("The minimum amount of time between a contact updating its position")]
     [SerializeField] private float m_minimumUpdateTime = 0.5f;
+    [Tooltip("The time a contact widget stays on screen after leaving range")]
+    [SerializeField] private float m_contactDestructionTime = 5f;
 
     private readonly Dictionary<GameObject, PrimaryRadarContact> m_radarContacts = new Dictionary<GameObject, PrimaryRadarContact>();
+    private readonly List<ContactPendingDestruction> m_contactsPendingDestruction = new List<ContactPendingDestruction>();
 
     private void Start()
     {
@@ -32,6 +54,19 @@ public class PrimaryRadarDisplay : MonoBehaviour
         {
             m_radar.OnObjectDetectedEvent.AddListener(OnObjectDetected);
             m_radar.OnObjectLeftRange.AddListener(OnObjectLeftRange);
+        }
+    }
+
+    private void Update()
+    {
+        for (int i = m_contactsPendingDestruction.Count - 1; i >= 0; i--)
+        {
+            if (Time.time >= m_contactsPendingDestruction[i].DestroyAtTime)
+            {
+                Destroy(m_contactsPendingDestruction[i].PrimaryRadarContact.WidgetGameObject);
+                m_radarContacts.Remove(m_contactsPendingDestruction[i].PrimaryRadarContact.ContactGameObject);
+                m_contactsPendingDestruction.RemoveAt(i);
+            }
         }
     }
 
@@ -72,7 +107,7 @@ public class PrimaryRadarDisplay : MonoBehaviour
             RectTransform newContactTransform = newRadarContact.transform as RectTransform;
             if (newContactTransform)
             {
-                PrimaryRadarContact newContact = new PrimaryRadarContact(newContactTransform);
+                PrimaryRadarContact newContact = new PrimaryRadarContact(newRadarContact, detectedObject, newContactTransform);
                 newContactTransform.anchoredPosition = widgetPosition;
                 m_radarContacts.Add(detectedObject, newContact);
             }
@@ -88,7 +123,9 @@ public class PrimaryRadarDisplay : MonoBehaviour
     {
         if (m_radarContacts.TryGetValue(objectOutOfRange, out PrimaryRadarContact contact))
         {
-            Destroy(contact.WidgetRectTransform.gameObject);
+            float destructionTime = Time.time + m_contactDestructionTime;
+            ContactPendingDestruction newPendingDestruction = new ContactPendingDestruction(contact, destructionTime);
+            m_contactsPendingDestruction.Add(newPendingDestruction);
             m_radarContacts.Remove(objectOutOfRange);
         }
     }

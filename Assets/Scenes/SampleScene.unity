@@ -227,6 +227,8 @@ MonoBehaviour:
   m_radar: {fileID: 499024098}
   m_radarWidgetTransform: {fileID: 25149809}
   m_radarContactPrefab: {fileID: 4522469115158686856, guid: 14e30a4be13c772439d19af61461a298, type: 3}
+  m_minimumUpdateTime: 0.5
+  m_contactDestructionTime: 5
 --- !u!1 &53817149
 GameObject:
   m_ObjectHideFlags: 0
@@ -817,7 +819,10 @@ MonoBehaviour:
   m_verticalAngle: 30
   m_horizontalAngle: 2
   m_nauticalRangeInNauticalMiles: 20
-  OnTargetDetectedEvent:
+  OnObjectLeftRange:
+    m_PersistentCalls:
+      m_Calls: []
+  OnObjectDetectedEvent:
     m_PersistentCalls:
       m_Calls: []
 --- !u!1 &564916305
