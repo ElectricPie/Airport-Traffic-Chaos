@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 // Setup for later data
@@ -90,6 +91,9 @@ public class PrimaryRadarDisplay : MonoBehaviour
         Vector2 widgetPosition = new Vector2(directionToTarget.x * widgetWidthDistance * distanceToTarget,
             directionToTarget.y * widgetHeightDistance * distanceToTarget);
 
+        // Prevent destruction if it reenters the range 
+        m_contactsPendingDestruction.RemoveAll(item => item.PrimaryRadarContact.ContactGameObject == detectedObject);
+
         // Update/Create contacts
         if (m_radarContacts.TryGetValue(detectedObject, out PrimaryRadarContact contact))
         {
@@ -126,7 +130,7 @@ public class PrimaryRadarDisplay : MonoBehaviour
             float destructionTime = Time.time + m_contactDestructionTime;
             ContactPendingDestruction newPendingDestruction = new ContactPendingDestruction(contact, destructionTime);
             m_contactsPendingDestruction.Add(newPendingDestruction);
-            m_radarContacts.Remove(objectOutOfRange);
+            // Wait to remove it from contacts in case it renters the range
         }
     }
 }
